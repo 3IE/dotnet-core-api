@@ -35,7 +35,7 @@ namespace TodoApi.Controllers
         /// <response code="200">Returns the list of all items</response>
         /// <response code="500">On error</response>
         [HttpGet]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(TodoItem[]), 200)]
         [ProducesResponseType(500)]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
         {
@@ -51,7 +51,7 @@ namespace TodoApi.Controllers
         /// <response code="200">The TodoItem with the matching id</response>
         /// <response code="404">If not elems match the given id</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(TodoItem), 200)]
         [ProducesResponseType(404)]
         public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
         {
@@ -85,10 +85,15 @@ namespace TodoApi.Controllers
         /// <response code="201">Returns the newly created item</response>
         /// <response code="400">If the item is null</response>
         [HttpPost]
-        [ProducesResponseType(201)]
+        [ProducesResponseType(typeof(TodoItem), 201)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem item)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.);
+            }
+
             _context.TodoItems.Add(item);
             await _context.SaveChangesAsync();
 
@@ -121,7 +126,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> PutTodoItem(long id, TodoItem item)
         {
-            if (id != item.Id)
+            if (id != item.Id || !ModelState.IsValid)
             {
                 return BadRequest();
             }
