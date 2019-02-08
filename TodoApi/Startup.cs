@@ -27,6 +27,8 @@ namespace TodoApi
             // Define .NET Core compatibility version
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            //services.AddTransient
+
             // Adds db context to the dependency injection container
             // Specify that the db context uses a db in memory
             //services.AddDbContext<TodoContext>(opt =>
