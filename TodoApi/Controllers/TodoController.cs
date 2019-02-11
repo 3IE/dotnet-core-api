@@ -91,7 +91,7 @@ namespace TodoApi.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.);
+                return BadRequest(ModelState.Values.First());
             }
 
             _context.TodoItems.Add(item);
@@ -128,7 +128,7 @@ namespace TodoApi.Controllers
         {
             if (id != item.Id || !ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState.Values.First());
             }
 
             _context.Entry(item).State = EntityState.Modified;
