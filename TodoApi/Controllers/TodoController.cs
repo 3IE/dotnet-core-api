@@ -53,7 +53,7 @@ namespace TodoApi.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(TodoItem), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
+        public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 
@@ -91,7 +91,7 @@ namespace TodoApi.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.);
+                return BadRequest(ModelState.Values.First());
             }
 
             _context.TodoItems.Add(item);
@@ -128,7 +128,7 @@ namespace TodoApi.Controllers
         {
             if (id != item.Id || !ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState.Values.First());
             }
 
             _context.Entry(item).State = EntityState.Modified;
@@ -147,7 +147,7 @@ namespace TodoApi.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> DeleteTodoItem(long id)
+        public async Task<IActionResult> DeleteTodoItem(int id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 

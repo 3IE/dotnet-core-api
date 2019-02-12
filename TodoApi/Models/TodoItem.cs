@@ -5,12 +5,15 @@ namespace TodoApi.Models
 {
     public class TodoItem
     {
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public string Name { get; set; }
 
         [DefaultValue(false)]
         public bool IsComplete { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
     }
 }
