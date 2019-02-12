@@ -91,7 +91,9 @@ namespace TodoApi.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.First());
+                return BadRequest(ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
             }
 
             _context.TodoItems.Add(item);
@@ -128,7 +130,9 @@ namespace TodoApi.Controllers
         {
             if (id != item.Id || !ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.First());
+                return BadRequest(ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
             }
 
             _context.Entry(item).State = EntityState.Modified;

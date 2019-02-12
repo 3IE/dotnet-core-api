@@ -81,7 +81,10 @@ namespace TodoApi.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.First());
+                // Uses LINQ to join error messages in a single string
+                return BadRequest(ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
             }
 
             _context.Users.Add(user);
@@ -105,9 +108,14 @@ namespace TodoApi.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetUserTodos(long id)
         {
+            var selectTodos = from Row in _context.TodoItems
+            where Row.UserId == id
+            select Row;
+
+
             return await _context.TodoItems
                 .Where(b => b.UserId == id)
-                .ToListAsync(); 
+                .ToListAsync();
         }
     }
 }
