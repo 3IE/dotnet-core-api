@@ -45,7 +45,7 @@ namespace TodoApi.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(User), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<User>> GetUser(long id)
+        public async Task<ActionResult<User>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -90,6 +90,24 @@ namespace TodoApi.Controllers
             // CreatedAtAction return HTTP 201 on successs
             // NB: standard for request that creates a ressource on the server
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+        }
+
+        // GET: api/Todo/5
+        /// <summary>
+        /// Returns the Todo Items where User has given id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A Todo Item list where User has matching id</returns>
+        /// <response code="200">A TodoItem list where User has matching id</response>
+        /// <response code="400">If passed parameter is of invalid type</response>
+        [HttpGet("Todos/{id}")]
+        [ProducesResponseType(typeof(TodoItem), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<IEnumerable<TodoItem>>> GetUserTodos(long id)
+        {
+            return await _context.TodoItems
+                .Where(b => b.UserId == id)
+                .ToListAsync(); 
         }
     }
 }

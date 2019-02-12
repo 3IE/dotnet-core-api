@@ -53,7 +53,7 @@ namespace TodoApi.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(TodoItem), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
+        public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 
@@ -147,7 +147,7 @@ namespace TodoApi.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> DeleteTodoItem(long id)
+        public async Task<IActionResult> DeleteTodoItem(int id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 
