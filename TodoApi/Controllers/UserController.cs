@@ -115,5 +115,30 @@ namespace TodoApi.Controllers
 
             return await selectTodos.ToListAsync();
         }
+
+        // DELETE: api/User/5
+        /// <summary>
+        /// Deletes a specific User.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <response code="204">Returns nothing</response>
+        /// <response code="404">If id invalid</response>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var item = await _context.Users.FindAsync(id);
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(item);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
