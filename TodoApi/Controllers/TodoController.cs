@@ -12,9 +12,9 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly DataContext _context;
 
-        public TodoController(TodoContext context)
+        public TodoController(DataContext context)
         {
             _context = context;
 
@@ -22,7 +22,7 @@ namespace TodoApi.Controllers
             {
                 // Create a new Todo Item if collection is empty,
                 // which means you can't delete all TodoItems.
-                _context.TodoItems.Add(new TodoItem { Name = "Item1" });
+                _context.TodoItems.Add(new TodoItems { Name = "Item1" });
                 _context.SaveChanges();
             }
         }
@@ -35,9 +35,9 @@ namespace TodoApi.Controllers
         /// <response code="200">Returns the list of all items</response>
         /// <response code="500">On error</response>
         [HttpGet]
-        [ProducesResponseType(typeof(TodoItem[]), 200)]
+        [ProducesResponseType(typeof(TodoItems[]), 200)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
+        public async Task<ActionResult<IEnumerable<TodoItems>>> GetTodoItems()
         {
             return await _context.TodoItems.ToListAsync();
         }
@@ -51,9 +51,9 @@ namespace TodoApi.Controllers
         /// <response code="200">The TodoItem with the matching id</response>
         /// <response code="404">If not elems match the given id</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(TodoItem), 200)]
+        [ProducesResponseType(typeof(TodoItems), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
+        public async Task<ActionResult<TodoItems>> GetTodoItem(int id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 
@@ -85,9 +85,9 @@ namespace TodoApi.Controllers
         /// <response code="201">Returns the newly created item</response>
         /// <response code="400">If the item is null</response>
         [HttpPost]
-        [ProducesResponseType(typeof(TodoItem), 201)]
+        [ProducesResponseType(typeof(TodoItems), 201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem item)
+        public async Task<ActionResult<TodoItems>> PostTodoItem(TodoItems item)
         {
             if (!ModelState.IsValid)
             {
@@ -126,7 +126,7 @@ namespace TodoApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> PutTodoItem(int id, TodoItem item)
+        public async Task<IActionResult> PutTodoItem(int id, TodoItems item)
         {
             if (id != item.Id || !ModelState.IsValid)
             {
