@@ -75,6 +75,7 @@ namespace TodoApi.Controllers
         /// <response code="201">Returns the newly created user</response>
         /// <response code="400">If the user is null</response>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(typeof(Users), 201)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<Users>> PostUser(Users user)

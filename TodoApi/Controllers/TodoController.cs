@@ -55,15 +55,15 @@ namespace TodoApi.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<TodoItems>> GetTodoItem(int id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var item = await _context.TodoItems.FindAsync(id);
 
-            if (todoItem == null)
+            if (item == null)
             {
                 return NotFound();
             }
 
             // Return type is in the form "type ActionResult<T>"
-            return todoItem;
+            return item;
         }
 
         // POST: api/Todo
@@ -85,6 +85,7 @@ namespace TodoApi.Controllers
         /// <response code="201">Returns the newly created item</response>
         /// <response code="400">If the item is null</response>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(typeof(TodoItems), 201)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<TodoItems>> PostTodoItem(TodoItems item)
@@ -124,6 +125,7 @@ namespace TodoApi.Controllers
         /// <response code="204">Returns nothing</response>
         /// <response code="400">If id or item is invalid</response>
         [HttpPut("{id}")]
+        [Consumes("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<IActionResult> PutTodoItem(int id, TodoItems item)
