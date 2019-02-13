@@ -35,8 +35,6 @@
   <ItemGroup>
     <Compile Remove="Controllers\ValuesController.cs" />
     <Compile Remove="Models\antoinedrayContext.cs" />
-    <Compile Remove="Models\TodoItems.cs" />
-    <Compile Remove="Models\Users.cs" />
     <Compile Remove="Models\DbContext.cs" />
   </ItemGroup>
 </Project>
