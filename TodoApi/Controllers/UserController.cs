@@ -112,10 +112,7 @@ namespace TodoApi.Controllers
             where Row.UserId == id
             select Row;
 
-
-            return await _context.TodoItems
-                .Where(b => b.UserId == id)
-                .ToListAsync();
+            return await selectTodos.ToListAsync();
         }
     }
 }
