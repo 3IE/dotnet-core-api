@@ -119,14 +119,14 @@ namespace TodoApi.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <param name="id"></param>
+        /// <param name="id">The TodoItem Id</param>
         /// <param name="item"></param>
         /// <response code="204">Returns nothing</response>
         /// <response code="400">If id or item is invalid</response>
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem item)
+        public async Task<IActionResult> PutTodoItem(int id, TodoItem item)
         {
             if (id != item.Id || !ModelState.IsValid)
             {
