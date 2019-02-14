@@ -96,22 +96,23 @@ namespace TodoApi.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
-        // GET: api/Todo/5
+        // GET: api/User/Todo/John%20Doe
         /// <summary>
-        /// Returns the Todo Items where User has given id.
+        /// Returns the Todo Items where User has given name.
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns>A Todo Item list where User has matching id</returns>
-        /// <response code="200">A TodoItem list where User has matching id</response>
+        /// <param name="name">The User name</param>
+        /// <returns>A Todo Item list where User has matching name</returns>
+        /// <response code="200">A TodoItem list where User has matching name</response>
         /// <response code="400">If passed parameter is of invalid type</response>
-        [HttpGet("Todos/{id}")]
+        [HttpGet("Todo/{name}")]
         [ProducesResponseType(typeof(TodoItems), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<TodoItems>>> GetUserTodos(long id)
+        public async Task<ActionResult<IEnumerable<TodoItems>>> GetUserTodos(string name)
         {
-            var selectTodos = from Row in _context.TodoItems
-            where Row.UserId == id
-            select Row;
+            var selectTodos = from user in _context.Users
+                                join item in _context.TodoItems on user.Id equals item.UserId
+                                where user.Name == name
+                                select item;
 
             return await selectTodos.ToListAsync();
         }
