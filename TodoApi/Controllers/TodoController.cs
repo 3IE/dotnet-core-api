@@ -12,9 +12,9 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly DataContext _context;
 
-        public TodoController(TodoContext context)
+        public TodoController(DataContext context)
         {
             _context = context;
 
@@ -22,7 +22,7 @@ namespace TodoApi.Controllers
             {
                 // Create a new Todo Item if collection is empty,
                 // which means you can't delete all TodoItems.
-                _context.TodoItems.Add(new TodoItem { Name = "Item1" });
+                _context.TodoItems.Add(new TodoItems { Name = "Item1" });
                 _context.SaveChanges();
             }
         }
@@ -35,9 +35,9 @@ namespace TodoApi.Controllers
         /// <response code="200">Returns the list of all items</response>
         /// <response code="500">On error</response>
         [HttpGet]
-        [ProducesResponseType(typeof(TodoItem[]), 200)]
+        [ProducesResponseType(typeof(TodoItems[]), 200)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
+        public async Task<ActionResult<IEnumerable<TodoItems>>> GetTodoItems()
         {
             return await _context.TodoItems.ToListAsync();
         }
@@ -51,19 +51,19 @@ namespace TodoApi.Controllers
         /// <response code="200">The TodoItem with the matching id</response>
         /// <response code="404">If not elems match the given id</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(TodoItem), 200)]
+        [ProducesResponseType(typeof(TodoItems), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
+        public async Task<ActionResult<TodoItems>> GetTodoItem(int id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var item = await _context.TodoItems.FindAsync(id);
 
-            if (todoItem == null)
+            if (item == null)
             {
                 return NotFound();
             }
 
             // Return type is in the form "type ActionResult<T>"
-            return todoItem;
+            return item;
         }
 
         // POST: api/Todo
@@ -85,13 +85,16 @@ namespace TodoApi.Controllers
         /// <response code="201">Returns the newly created item</response>
         /// <response code="400">If the item is null</response>
         [HttpPost]
-        [ProducesResponseType(typeof(TodoItem), 201)]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(TodoItems), 201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem item)
+        public async Task<ActionResult<TodoItems>> PostTodoItem(TodoItems item)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.First());
+                return BadRequest(ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
             }
 
             _context.TodoItems.Add(item);
@@ -117,18 +120,21 @@ namespace TodoApi.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <param name="id"></param>
+        /// <param name="id">The TodoItem Id</param>
         /// <param name="item"></param>
         /// <response code="204">Returns nothing</response>
         /// <response code="400">If id or item is invalid</response>
         [HttpPut("{id}")]
+        [Consumes("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem item)
+        public async Task<IActionResult> PutTodoItem(int id, TodoItems item)
         {
             if (id != item.Id || !ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.First());
+                return BadRequest(ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
             }
 
             _context.Entry(item).State = EntityState.Modified;

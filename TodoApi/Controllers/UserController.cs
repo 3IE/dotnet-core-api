@@ -12,9 +12,9 @@ namespace TodoApi.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly DataContext _context;
 
-        public UserController(TodoContext context)
+        public UserController(DataContext context)
         {
             _context = context;
         }
@@ -27,9 +27,9 @@ namespace TodoApi.Controllers
         /// <response code="200">Returns the list of all users</response>
         /// <response code="500">On error</response>
         [HttpGet]
-        [ProducesResponseType(typeof(TodoItem[]), 200)]
+        [ProducesResponseType(typeof(TodoItems[]), 200)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
         }
@@ -43,9 +43,9 @@ namespace TodoApi.Controllers
         /// <response code="200">The User with the matching id</response>
         /// <response code="404">If users match the given id</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(User), 200)]
+        [ProducesResponseType(typeof(Users), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<Users>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -75,13 +75,17 @@ namespace TodoApi.Controllers
         /// <response code="201">Returns the newly created user</response>
         /// <response code="400">If the user is null</response>
         [HttpPost]
-        [ProducesResponseType(typeof(User), 201)]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(Users), 201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<Users>> PostUser(Users user)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.First());
+                // Uses LINQ to join error messages in a single string
+                return BadRequest(ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
             }
 
             _context.Users.Add(user);
@@ -92,22 +96,50 @@ namespace TodoApi.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
-        // GET: api/Todo/5
+        // GET: api/User/Todo/John%20Doe
         /// <summary>
-        /// Returns the Todo Items where User has given id.
+        /// Returns the Todo Items where User has given name.
+        /// </summary>
+        /// <param name="name">The User name</param>
+        /// <returns>A Todo Item list where User has matching name</returns>
+        /// <response code="200">A TodoItem list where User has matching name</response>
+        /// <response code="400">If passed parameter is of invalid type</response>
+        [HttpGet("Todo/{name}")]
+        [ProducesResponseType(typeof(TodoItems), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<IEnumerable<TodoItems>>> GetUserTodos(string name)
+        {
+            var selectTodos = from user in _context.Users
+                                join item in _context.TodoItems on user.Id equals item.UserId
+                                where user.Name == name
+                                select item;
+
+            return await selectTodos.ToListAsync();
+        }
+
+        // DELETE: api/User/5
+        /// <summary>
+        /// Deletes a specific User.
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>A Todo Item list where User has matching id</returns>
-        /// <response code="200">A TodoItem list where User has matching id</response>
-        /// <response code="400">If passed parameter is of invalid type</response>
-        [HttpGet("Todos/{id}")]
-        [ProducesResponseType(typeof(TodoItem), 200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<TodoItem>>> GetUserTodos(long id)
+        /// <response code="204">Returns nothing</response>
+        /// <response code="404">If id invalid</response>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            return await _context.TodoItems
-                .Where(b => b.UserId == id)
-                .ToListAsync(); 
+            var item = await _context.Users.FindAsync(id);
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(item);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

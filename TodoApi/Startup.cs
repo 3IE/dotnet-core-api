@@ -34,7 +34,7 @@ namespace TodoApi
             //services.AddDbContext<TodoContext>(opt =>
             //    opt.UseInMemoryDatabase("TodoList"));
 
-            services.AddDbContext<TodoContext>(options =>
+            services.AddDbContext<DataContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             // Register the Swagger generator, defining 1 or more Swagger documents
