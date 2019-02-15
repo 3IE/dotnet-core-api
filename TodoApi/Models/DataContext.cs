@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using Microsoft.Extensions.Configuration;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
