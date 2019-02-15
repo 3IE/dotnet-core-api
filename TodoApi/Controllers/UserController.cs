@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,10 @@ using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
+    [Produces("application/json")]
     public class UserController : ControllerBase
     {
         private readonly DataContext _context;
@@ -17,6 +19,18 @@ namespace TodoApi.Controllers
         public UserController(DataContext context)
         {
             _context = context;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("authenticate")]
+        public IActionResult Authenticate([FromBody]Users userParam)
+        {
+            var user = _context.Authenticate(userParam.Username, userParam.Password);
+
+            if (user == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
+
+            return Ok(user);
         }
 
         // GET: api/User
@@ -111,7 +125,7 @@ namespace TodoApi.Controllers
         {
             var selectTodos = from user in _context.Users
                                 join item in _context.TodoItems on user.Id equals item.UserId
-                                where user.Name == name
+                                where user.Username == name
                                 select item;
 
             return await selectTodos.ToListAsync();
