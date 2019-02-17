@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TodoApi.Models;
+using TodoApi.Dbo;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace TodoApi
@@ -67,19 +67,43 @@ namespace TodoApi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
 
+            app.Use(async (context, next) =>
+            {
+                // Do work that doesn't write to the Response.
+                Console.WriteLine("Received request in custom Middleware");
+                await next.Invoke();
+            });
+
             if (env.IsDevelopment())
             {
-                // Display page with detailed info about exceptions
+                // When the app runs in the Development environment:
+                //   Use the Developer Exception Page to report app runtime errors.
+                //   Use the Database Error Page to report database runtime errors.
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
             else
             {
-                // Adds Strict-Transport-Security header
+                // When the app doesn't run in the Development environment:
+                //   Enable the Exception Handler Middleware to catch exceptions
+                //     thrown in the following middlewares.
+                //   Use the HTTP Strict Transport Security Protocol (HSTS)
+                //     Middleware.
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
-            // Redirects HTTP requests to HTTPS
+            // Use HTTPS Redirection Middleware to redirect HTTP requests to HTTPS.
             app.UseHttpsRedirection();
+
+            // Use Cookie Policy Middleware to conform to EU General Data 
+            // Protection Regulation (GDPR) regulations.
+            app.UseCookiePolicy();
+
+            // Authenticate before the user accesses secure resources.
+            app.UseAuthentication();
+
+            // Add MVC to the request pipeline.
             app.UseMvc();
         }
     }
