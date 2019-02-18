@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Models;
+using TodoApi.Dbo;
+using TodoApi.BusinessManagement;
 
 namespace TodoApi.Controllers
 {

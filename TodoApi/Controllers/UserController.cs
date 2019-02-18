@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Models;
+using TodoApi.Dbo;
+using TodoApi.BusinessManagement;
+using System;
 
 namespace TodoApi.Controllers
 {
@@ -15,20 +17,33 @@ namespace TodoApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly DataContext _context;
+        private IUserService _userService;
 
-        public UserController(DataContext context)
+        public UserController(IUserService userService, DataContext context)
         {
             _context = context;
+            _userService = userService;
         }
 
+        // GET: api/User/Authenticate
+        /// <summary>
+        /// Logs in the user.
+        /// </summary>
+        /// <returns>Returns the User</returns>
+        /// <response code="200">Returns the list of all users</response>
+        /// <response code="500">On error</response>
         [AllowAnonymous]
-        [HttpPost("authenticate")]
-        public IActionResult Authenticate([FromBody]Users userParam)
+        [HttpPost("Authenticate")]
+        [ProducesResponseType(typeof(Users), 200)]
+        [ProducesResponseType(400)]
+        public ActionResult<Users> Authenticate([FromBody]Users userParam)
         {
-            var user = _context.Authenticate(userParam.Username, userParam.Password);
+            var user = _userService.Authenticate(userParam.Username, userParam.Password);
 
             if (user == null)
+            {
                 return BadRequest(new { message = "Username or password is incorrect" });
+            }
 
             return Ok(user);
         }
@@ -88,6 +103,7 @@ namespace TodoApi.Controllers
         /// <returns>A newly created User</returns>
         /// <response code="201">Returns the newly created user</response>
         /// <response code="400">If the user is null</response>
+        [AllowAnonymous]
         [HttpPost]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(Users), 201)]
