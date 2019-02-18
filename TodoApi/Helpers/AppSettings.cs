@@ -1,4 +1,4 @@
-﻿namespace TodoApi.Dbo
+﻿namespace TodoApi.Helpers
 {
     public class AppSettings
     {

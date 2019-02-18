@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TodoApi.Dbo
+namespace TodoApi.Entities
 {
     public partial class Users
     {
@@ -17,10 +17,9 @@ namespace TodoApi.Dbo
         [Column(TypeName = "character varying")]
         public string Username { get; set; }
         [Required]
-        [Column(TypeName = "character varying")]
-        public string Password { get; set; }
-        [Column(TypeName = "character varying")]
-        public string Token { get; set; }
+        public byte[] PasswordHash { get; set; }
+        [Required]
+        public byte[] PasswordSalt { get; set; }
 
         [InverseProperty("User")]
         public ICollection<TodoItems> TodoItems { get; set; }

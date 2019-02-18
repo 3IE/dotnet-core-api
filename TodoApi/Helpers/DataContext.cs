@@ -1,8 +1,7 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using TodoApi.Entities;
 
-namespace TodoApi.Dbo
+namespace TodoApi.Helpers
 {
     public partial class DataContext : DbContext
     {
