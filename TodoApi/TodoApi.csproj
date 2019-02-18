@@ -8,7 +8,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
-    <Folder Include="Models\" />
+    <Folder Include="BusinessManagement\" />
+    <Folder Include="DataAccess\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,5 +37,6 @@
     <Compile Remove="Controllers\ValuesController.cs" />
     <Compile Remove="Models\antoinedrayContext.cs" />
     <Compile Remove="Models\DbContext.cs" />
+    <Compile Remove="Entities\DataContext.cs" />
   </ItemGroup>
 </Project>
