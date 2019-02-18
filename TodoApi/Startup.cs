@@ -4,11 +4,15 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TodoApi.Dbo;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
+using System.Text;
+using TodoApi.Dbo;
+using TodoApi.BusinessManagement;
 
 namespace TodoApi
 {
@@ -24,6 +28,34 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // configure strongly typed settings objects
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            // configure jwt authentication
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            // configure DI for application services
+            services.AddScoped<IUserService, UserService>();
+
             // Define .NET Core compatibility version
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -67,13 +99,6 @@ namespace TodoApi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
 
-            app.Use(async (context, next) =>
-            {
-                // Do work that doesn't write to the Response.
-                Console.WriteLine("Received request in custom Middleware");
-                await next.Invoke();
-            });
-
             if (env.IsDevelopment())
             {
                 // When the app runs in the Development environment:
@@ -93,12 +118,19 @@ namespace TodoApi
                 app.UseHsts();
             }
 
+            app.Use(async (context, next) =>
+            {
+                // Do work that doesn't write to the Response.
+                Console.WriteLine("Received request in custom Middleware");
+                await next.Invoke();
+            });
+
             // Use HTTPS Redirection Middleware to redirect HTTP requests to HTTPS.
             app.UseHttpsRedirection();
 
             // Use Cookie Policy Middleware to conform to EU General Data 
             // Protection Regulation (GDPR) regulations.
-            app.UseCookiePolicy();
+            //app.UseCookiePolicy();
 
             // Authenticate before the user accesses secure resources.
             app.UseAuthentication();
