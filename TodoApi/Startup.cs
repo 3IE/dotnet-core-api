@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Swagger;
 using AutoMapper;
 using System.Text;
@@ -35,6 +36,8 @@ namespace TodoApi
             //    opt.UseInMemoryDatabase("TodoList"));
             services.AddDbContext<DataContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddResponseCompression();
 
             // Define .NET Core compatibility version
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -130,10 +133,13 @@ namespace TodoApi
 
             // Use Cookie Policy Middleware to conform to EU General Data 
             // Protection Regulation (GDPR) regulations.
-            //app.UseCookiePolicy();
+            app.UseCookiePolicy();
 
             // Authenticate before the user accesses secure resources.
             app.UseAuthentication();
+
+            // Compresses app responses
+            app.UseResponseCompression();
 
             // Add MVC to the request pipeline.
             app.UseMvc();
