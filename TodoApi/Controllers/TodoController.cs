@@ -1,16 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Dbo;
-using TodoApi.BusinessManagement;
+using System.IdentityModel.Tokens.Jwt;
+using TodoApi.Entities;
+using TodoApi.Helpers;
 
 namespace TodoApi.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
+    [Produces("application/json")]
     public class TodoController : ControllerBase
     {
         private readonly DataContext _context;

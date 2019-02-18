@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Text;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TodoApi.Dbo;
-using TodoApi.BusinessManagement;
-using System;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
+using TodoApi.Entities;
+using TodoApi.Services;
+using TodoApi.Helpers;
+using TodoApi.Dtos;
 
 namespace TodoApi.Controllers
 {
@@ -16,13 +21,21 @@ namespace TodoApi.Controllers
     [Produces("application/json")]
     public class UserController : ControllerBase
     {
-        private readonly DataContext _context;
         private IUserService _userService;
+        private IMapper _mapper;
+        private readonly AppSettings _appSettings;
+        private readonly DataContext _context;
 
-        public UserController(IUserService userService, DataContext context)
+        public UserController(
+            IUserService userService,
+            IMapper mapper,
+            IOptions<AppSettings> appSettings,
+            DataContext context)
         {
             _context = context;
             _userService = userService;
+            _mapper = mapper;
+            _appSettings = appSettings.Value;
         }
 
         // GET: api/User/Authenticate
@@ -36,96 +49,129 @@ namespace TodoApi.Controllers
         [HttpPost("Authenticate")]
         [ProducesResponseType(typeof(Users), 200)]
         [ProducesResponseType(400)]
-        public ActionResult<Users> Authenticate([FromBody]Users userParam)
+        public ActionResult<Users> Authenticate([FromBody]UserDto userDto)
         {
-            var user = _userService.Authenticate(userParam.Username, userParam.Password);
+            var user = _userService.Authenticate(userDto.Username, userDto.Password);
 
             if (user == null)
             {
                 return BadRequest(new { message = "Username or password is incorrect" });
             }
 
-            return Ok(user);
+            // Initializes an instance of JwtSecurityTokenHandler.
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            // Encodes a set of characters into a sequence of bytes
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+
+            // Place holder for all the attributes related to the issued token
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                // The ClaimsIdentity class is a concrete implementation of a claims-based identity;
+                // that is, an identity described by a collection of claims.
+                // A claim is a statement about an entity made by an issuer that describes a property,
+                // right, or some other quality of that entity.
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.Id.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            // return basic user info (without password) and token to store client side
+            return Ok(new
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Token = tokenString
+            });
         }
 
-        // GET: api/User
+        // GET: api/User/Register
         /// <summary>
-        /// Returns the list of all Users.
+        /// Register a new user.
         /// </summary>
-        /// <returns>Returns the list of all users</returns>
-        /// <response code="200">Returns the list of all users</response>
-        /// <response code="500">On error</response>
-        [HttpGet]
-        [ProducesResponseType(typeof(TodoItems[]), 200)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
+        /// <returns>Returns nothing</returns>
+        /// <response code="200">Returns nothing</response>
+        /// <response code="400">On creation error</response>
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult Register([FromBody]UserDto userDto)
         {
-            return await _context.Users.ToListAsync();
+            // map dto to entity
+            var user = _mapper.Map<Users>(userDto);
+
+            try
+            {
+                _userService.Create(user, userDto.Password);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // GET: api/User/5
+        [HttpGet]
+        [ProducesResponseType(200)]
+        public IActionResult GetAll()
+        {
+            var users = _userService.GetAll();
+            var userDtos = _mapper.Map<IList<UserDto>>(users);
+            return Ok(userDtos);
+        }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(200)]
+        public IActionResult GetById(int id)
+        {
+            var user = _userService.GetById(id);
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(userDto);
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult Update(int id, [FromBody]UserDto userDto)
+        {
+            // map dto to entity and set id
+            var user = _mapper.Map<Users>(userDto);
+            user.Id = id;
+
+            try
+            {
+                // save 
+                _userService.Update(user, userDto.Password);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // DELETE: api/User/5
         /// <summary>
-        /// Returns the User with given id.
+        /// Deletes a specific User.
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>The User with the matching id</returns>
-        /// <response code="200">The User with the matching id</response>
-        /// <response code="404">If users match the given id</response>
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(Users), 200)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<Users>> GetUser(int id)
+        [HttpDelete("{id}")]
+        [ProducesResponseType(200)]
+        public IActionResult Delete(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return user;
+            _userService.Delete(id);
+            return Ok();
         }
 
-        // POST: api/User
-        /// <summary>
-        /// Creates a User.
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///     POST /User
-        ///     {
-        ///        "name": "John"
-        ///     }
-        ///
-        /// </remarks>
-        /// <param name="user"></param>
-        /// <returns>A newly created User</returns>
-        /// <response code="201">Returns the newly created user</response>
-        /// <response code="400">If the user is null</response>
-        [AllowAnonymous]
-        [HttpPost]
-        [Consumes("application/json")]
-        [ProducesResponseType(typeof(Users), 201)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<Users>> PostUser(Users user)
-        {
-            if (!ModelState.IsValid)
-            {
-                // Uses LINQ to join error messages in a single string
-                return BadRequest(ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage));
-            }
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            // CreatedAtAction return HTTP 201 on successs
-            // NB: standard for request that creates a ressource on the server
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-        }
-
+        /*
         // GET: api/User/Todo/John%20Doe
         /// <summary>
         /// Returns the Todo Items where User has given name.
@@ -146,30 +192,6 @@ namespace TodoApi.Controllers
 
             return await selectTodos.ToListAsync();
         }
-
-        // DELETE: api/User/5
-        /// <summary>
-        /// Deletes a specific User.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <response code="204">Returns nothing</response>
-        /// <response code="404">If id invalid</response>
-        [HttpDelete("{id}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var item = await _context.Users.FindAsync(id);
-
-            if (item == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(item);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
+        */
     }
 }
