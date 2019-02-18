@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace TodoApi.Models
+namespace TodoApi.Dbo
 {
     public partial class DataContext : DbContext
     {
@@ -40,9 +40,9 @@ namespace TodoApi.Models
                 entity.Property(e => e.Id).HasDefaultValueSql("nextval('\"User_id_seq\"'::regclass)");
             });
 
-            modelBuilder.HasSequence<int>("TodoItems_id_seq");
+            modelBuilder.HasSequence("TodoItems_id_seq");
 
-            modelBuilder.HasSequence<int>("User_id_seq");
+            modelBuilder.HasSequence("User_id_seq");
         }
     }
 }
