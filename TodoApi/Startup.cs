@@ -10,9 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
+using AutoMapper;
 using System.Text;
-using TodoApi.Dbo;
-using TodoApi.BusinessManagement;
+using TodoApi.Helpers;
+using TodoApi.Services;
 
 namespace TodoApi
 {
@@ -28,6 +29,18 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Adds db context to the dependency injection container
+            // Specify that the db context uses a db in memory
+            //services.AddDbContext<TodoContext>(opt =>
+            //    opt.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<DataContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+            // Define .NET Core compatibility version
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddAutoMapper(typeof(Startup));
+
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
@@ -55,19 +68,6 @@ namespace TodoApi
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
-
-            // Define .NET Core compatibility version
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            //services.AddTransient
-
-            // Adds db context to the dependency injection container
-            // Specify that the db context uses a db in memory
-            //services.AddDbContext<TodoContext>(opt =>
-            //    opt.UseInMemoryDatabase("TodoList"));
-
-            services.AddDbContext<DataContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
