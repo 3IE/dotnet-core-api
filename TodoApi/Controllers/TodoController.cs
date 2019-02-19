@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.IdentityModel.Tokens.Jwt;
 using TodoApi.Entities;
 using TodoApi.Helpers;
 

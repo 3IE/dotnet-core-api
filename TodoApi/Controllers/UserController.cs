@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
@@ -162,7 +165,8 @@ namespace TodoApi.Controllers
         /// <summary>
         /// Deletes a specific User.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">The User id</param>
+        /// <response code="200">Returns nothing</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(200)]
         public IActionResult Delete(int id)
@@ -171,7 +175,6 @@ namespace TodoApi.Controllers
             return Ok();
         }
 
-        /*
         // GET: api/User/Todo/John%20Doe
         /// <summary>
         /// Returns the Todo Items where User has given name.
@@ -192,6 +195,5 @@ namespace TodoApi.Controllers
 
             return await selectTodos.ToListAsync();
         }
-        */
     }
 }
