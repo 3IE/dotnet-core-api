@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,10 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Swagger;
 using AutoMapper;
-using System.Text;
 using TodoApi.Helpers;
 using TodoApi.Services;
 
@@ -48,12 +47,17 @@ namespace TodoApi
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
 
-            // configure jwt authentication
+            // configure JWT authentication
             var appSettings = appSettingsSection.Get<AppSettings>();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
             services.AddAuthentication(x =>
             {
+                //  AuthenticateAsync() will use this scheme, and also the AuthenticationMiddleware added by
+                // UseAuthentication() will use this scheme to set context.User automatically.
+                // (Corresponds to AutomaticAuthentication)
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                // ChallengeAsync() will use this scheme, [Authorize] with policies that
+                // don't specify schemes will also use this
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(x =>
