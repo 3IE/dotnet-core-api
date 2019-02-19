@@ -4,7 +4,7 @@ using System.Linq;
 using TodoApi.Entities;
 using TodoApi.Helpers;
 
-namespace TodoApi.Services
+namespace TodoApi.BusinessManagment
 {
     public interface IUserService
     {
