@@ -9,7 +9,6 @@ using TodoApi.Helpers;
 
 namespace TodoApi.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
@@ -20,14 +19,6 @@ namespace TodoApi.Controllers
         public TodoController(DataContext context)
         {
             _context = context;
-
-            if (_context.TodoItems.Count() == 0)
-            {
-                // Create a new Todo Item if collection is empty,
-                // which means you can't delete all TodoItems.
-                _context.TodoItems.Add(new TodoItems { Name = "Item1" });
-                _context.SaveChanges();
-            }
         }
 
         // GET: api/Todo
