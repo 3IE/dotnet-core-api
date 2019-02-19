@@ -8,8 +8,9 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
-    <Folder Include="Services\" />
+    <Folder Include="BusinessManagment\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Middleware\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,5 +42,6 @@
     <Compile Remove="Models\DbContext.cs" />
     <Compile Remove="Entities\DataContext.cs" />
     <Compile Remove="Models\DataContext.cs" />
+    <Compile Remove="Midlleware\BasicMiddleware.cs" />
   </ItemGroup>
 </Project>

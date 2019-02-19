@@ -13,7 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 using AutoMapper;
 using TodoApi.Helpers;
-using TodoApi.Services;
+using TodoApi.Middleware;
+using TodoApi.BusinessManagment;
 
 namespace TodoApi
 {
@@ -35,6 +36,8 @@ namespace TodoApi
             //    opt.UseInMemoryDatabase("TodoList"));
             services.AddDbContext<DataContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddMemoryCache();
 
             services.AddResponseCompression();
 
@@ -125,22 +128,19 @@ namespace TodoApi
                 app.UseHsts();
             }
 
-            app.Use(async (context, next) =>
-            {
-                // Do work that doesn't write to the Response.
-                Console.WriteLine("Received request in custom Middleware");
-                await next.Invoke();
-            });
-
             // Use HTTPS Redirection Middleware to redirect HTTP requests to HTTPS.
             app.UseHttpsRedirection();
 
             // Use Cookie Policy Middleware to conform to EU General Data 
             // Protection Regulation (GDPR) regulations.
-            app.UseCookiePolicy();
+            // app.UseCookiePolicy();
 
             // Authenticate before the user accesses secure resources.
             app.UseAuthentication();
+
+            // Runs custom Middleware
+            //app.UseCustomMiddleware(new CustomMiddlewareOptions { DisplayBefore = true });
+            //app.UseCustomMiddleware(new CustomMiddlewareOptions { DisplayAfter = false });
 
             // Compresses app responses
             app.UseResponseCompression();
