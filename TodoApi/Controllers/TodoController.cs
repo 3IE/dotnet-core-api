@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Models;
+using TodoApi.Entities;
+using TodoApi.Helpers;
 
 namespace TodoApi.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [Produces("application/json")]
     public class TodoController : ControllerBase
     {
         private readonly DataContext _context;
@@ -17,14 +19,6 @@ namespace TodoApi.Controllers
         public TodoController(DataContext context)
         {
             _context = context;
-
-            if (_context.TodoItems.Count() == 0)
-            {
-                // Create a new Todo Item if collection is empty,
-                // which means you can't delete all TodoItems.
-                _context.TodoItems.Add(new TodoItems { Name = "Item1" });
-                _context.SaveChanges();
-            }
         }
 
         // GET: api/Todo

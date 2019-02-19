@@ -1,10 +1,7 @@
-﻿using System.ComponentModel;
-using Microsoft.Extensions.Configuration;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using TodoApi.Entities;
 
-namespace TodoApi.Models
+namespace TodoApi.Helpers
 {
     public partial class DataContext : DbContext
     {
@@ -42,9 +39,9 @@ namespace TodoApi.Models
                 entity.Property(e => e.Id).HasDefaultValueSql("nextval('\"User_id_seq\"'::regclass)");
             });
 
-            modelBuilder.HasSequence<int>("TodoItems_id_seq");
+            modelBuilder.HasSequence("TodoItems_id_seq");
 
-            modelBuilder.HasSequence<int>("User_id_seq");
+            modelBuilder.HasSequence("User_id_seq");
         }
     }
 }

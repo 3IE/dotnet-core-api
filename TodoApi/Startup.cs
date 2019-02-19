@@ -1,14 +1,20 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TodoApi.Models;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
+using AutoMapper;
+using TodoApi.Helpers;
+using TodoApi.Middleware;
+using TodoApi.BusinessManagment;
 
 namespace TodoApi
 {
@@ -24,18 +30,54 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Define .NET Core compatibility version
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            //services.AddTransient
-
             // Adds db context to the dependency injection container
             // Specify that the db context uses a db in memory
             //services.AddDbContext<TodoContext>(opt =>
             //    opt.UseInMemoryDatabase("TodoList"));
-
             services.AddDbContext<DataContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddMemoryCache();
+
+            services.AddResponseCompression();
+
+            // Define .NET Core compatibility version
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddAutoMapper(typeof(Startup));
+
+            // configure strongly typed settings objects
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            // configure JWT authentication
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(x =>
+            {
+                //  AuthenticateAsync() will use this scheme, and also the AuthenticationMiddleware added by
+                // UseAuthentication() will use this scheme to set context.User automatically.
+                // (Corresponds to AutomaticAuthentication)
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                // ChallengeAsync() will use this scheme, [Authorize] with policies that
+                // don't specify schemes will also use this
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            // configure DI for application services
+            services.AddScoped<IUserService, UserService>();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -69,17 +111,41 @@ namespace TodoApi
 
             if (env.IsDevelopment())
             {
-                // Display page with detailed info about exceptions
+                // When the app runs in the Development environment:
+                //   Use the Developer Exception Page to report app runtime errors.
+                //   Use the Database Error Page to report database runtime errors.
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
             else
             {
-                // Adds Strict-Transport-Security header
+                // When the app doesn't run in the Development environment:
+                //   Enable the Exception Handler Middleware to catch exceptions
+                //     thrown in the following middlewares.
+                //   Use the HTTP Strict Transport Security Protocol (HSTS)
+                //     Middleware.
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
-            // Redirects HTTP requests to HTTPS
+            // Use HTTPS Redirection Middleware to redirect HTTP requests to HTTPS.
             app.UseHttpsRedirection();
+
+            // Use Cookie Policy Middleware to conform to EU General Data 
+            // Protection Regulation (GDPR) regulations.
+            // app.UseCookiePolicy();
+
+            // Authenticate before the user accesses secure resources.
+            app.UseAuthentication();
+
+            // Runs custom Middleware
+            //app.UseCustomMiddleware(new CustomMiddlewareOptions { DisplayBefore = true });
+            //app.UseCustomMiddleware(new CustomMiddlewareOptions { DisplayAfter = false });
+
+            // Compresses app responses
+            app.UseResponseCompression();
+
+            // Add MVC to the request pipeline.
             app.UseMvc();
         }
     }
