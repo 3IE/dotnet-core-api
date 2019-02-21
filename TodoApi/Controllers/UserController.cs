@@ -8,8 +8,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
-using TodoApi.Entities;
-using TodoApi.BusinessManagment;
+using TodoApi.Models;
+using TodoApi.Services;
 using TodoApi.Helpers;
 using TodoApi.Dtos;
 

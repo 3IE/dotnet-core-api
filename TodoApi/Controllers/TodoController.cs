@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Entities;
+using TodoApi.Models;
 using TodoApi.Helpers;
 
 namespace TodoApi.Controllers
@@ -14,10 +15,12 @@ namespace TodoApi.Controllers
     [Produces("application/json")]
     public class TodoController : ControllerBase
     {
+        private IMemoryCache _cache;
         private readonly DataContext _context;
 
-        public TodoController(DataContext context)
+        public TodoController(IMemoryCache memoryCache, DataContext context)
         {
+            _cache = memoryCache;
             _context = context;
         }
 

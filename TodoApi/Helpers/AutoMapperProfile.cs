@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using TodoApi.Dtos;
-using TodoApi.Entities;
+using TodoApi.Models;
 
 namespace TodoApi.Helpers
 {

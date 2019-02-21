@@ -8,9 +8,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
-    <Folder Include="BusinessManagment\" />
+    <Folder Include="Services\" />
     <Folder Include="Helpers\" />
     <Folder Include="Middleware\" />
+    <Folder Include="DataAccess\" />
   </ItemGroup>
 
   <ItemGroup>

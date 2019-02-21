@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using AutoMapper;
 using TodoApi.Helpers;
 using TodoApi.Middleware;
-using TodoApi.BusinessManagment;
+using TodoApi.Services;
 
 namespace TodoApi
 {
@@ -37,6 +37,7 @@ namespace TodoApi
             services.AddDbContext<DataContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
+            // Adds memory caching
             services.AddMemoryCache();
 
             services.AddResponseCompression();

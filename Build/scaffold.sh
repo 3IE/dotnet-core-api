@@ -11,4 +11,4 @@ else
     exit 1
 fi
 
-dotnet ef dbcontext scaffold "Host=localhost;Database=${DB};Username=${USER};Password=password" Npgsql.EntityFrameworkCore.PostgreSQL -d -f -c DataContext -o Entities --verbose
+dotnet ef dbcontext scaffold "Host=localhost;Database=${DB};Username=${USER};Password=password" Npgsql.EntityFrameworkCore.PostgreSQL -d -f -c DataContext -o Models --verbose
