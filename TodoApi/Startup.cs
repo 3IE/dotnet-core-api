@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 using AutoMapper;
+using TodoApi.Models;
 using TodoApi.Helpers;
 using TodoApi.Middleware;
 using TodoApi.Services;
@@ -79,6 +80,8 @@ namespace TodoApi
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
+
+            services.AddScoped<ITodoServices, TodoServices>();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>

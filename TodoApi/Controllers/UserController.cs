@@ -116,7 +116,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType(200)]
         public IActionResult GetAll()
         {
-            var users = _userService.GetAll();
+            var users = _userService.GetAllUsers();
             var userDtos = _mapper.Map<IList<UserDto>>(users);
             return Ok(userDtos);
         }
@@ -158,7 +158,7 @@ namespace TodoApi.Controllers
             try
             {
                 // save 
-                _userService.Update(user, userDto.Password);
+                _userService.UpdateUser(user, userDto.Password);
                 return Ok();
             }
             catch (AppException ex)
@@ -178,7 +178,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType(200)]
         public IActionResult Delete(int id)
         {
-            _userService.Delete(id);
+            _userService.DeleteUser(id);
             return Ok();
         }
     }

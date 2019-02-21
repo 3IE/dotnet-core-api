@@ -1,28 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TodoApi.Models;
+using System.Threading.Tasks;
 using TodoApi.Helpers;
+using TodoApi.Models;
+using TodoApi.DataAccess;
 
 namespace TodoApi.Services
 {
     public interface IUserService
     {
         Users Authenticate(string username, string password);
-        IEnumerable<Users> GetAll();
-        Users GetById(int id);
+        Task<IEnumerable<Users>> GetAllUsers();
+        Task<Users> GetById(int id);
         IEnumerable<TodoItems> GetUserTodos(string name);
-        Users Create(Users user, string password);
-        void Update(Users user, string password = null);
-        void Delete(int id);
+        Task<Users> Create(Users user, string password);
+        Task UpdateUser(Users userParam, string password = null);
+        Task DeleteUser(int id);
     }
 
     public class UserService : IUserService
     {
+        private RepositoryBase<Users> _userRepository;
         private DataContext _context;
 
-        public UserService(DataContext context)
+        public UserService(RepositoryBase<Users> userRepository, DataContext context)
         {
+            _userRepository = userRepository;
             _context = context;
         }
 
@@ -53,14 +57,14 @@ namespace TodoApi.Services
             return user;
         }
 
-        public IEnumerable<Users> GetAll()
+        public async Task<IEnumerable<Users>> GetAllUsers()
         {
-            return _context.Users;
+            return await _userRepository.GetAll();
         }
 
-        public Users GetById(int id)
+        public async Task<Users> GetById(int id)
         {
-            return _context.Users.Find(id);
+            return await _userRepository.GetElem(id);
         }
 
         public IEnumerable<TodoItems> GetUserTodos(string name)
@@ -73,7 +77,7 @@ namespace TodoApi.Services
             return selectTodos.ToList();
         }
 
-        public Users Create(Users user, string password)
+        public async Task<Users> Create(Users user, string password)
         {
             // validation
             if (string.IsNullOrWhiteSpace(password))
@@ -88,13 +92,12 @@ namespace TodoApi.Services
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            await _userRepository.AddElem(user);
 
             return user;
         }
 
-        public void Update(Users userParam, string password = null)
+        public async Task UpdateUser(Users userParam, string password = null)
         {
             var user = _context.Users.Find(userParam.Id);
 
@@ -121,17 +124,15 @@ namespace TodoApi.Services
                 user.PasswordSalt = passwordSalt;
             }
 
-            _context.Users.Update(user);
-            _context.SaveChanges();
+            await _userRepository.AddElem(user);
         }
 
-        public void Delete(int id)
+        public async Task DeleteUser(int id)
         {
             var user = _context.Users.Find(id);
             if (user != null)
             {
-                _context.Users.Remove(user);
-                _context.SaveChanges();
+                await _userRepository.DeleteElem(user);
             }
         }
 
