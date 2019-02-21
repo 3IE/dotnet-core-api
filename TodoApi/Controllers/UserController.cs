@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Text;
-using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
@@ -27,15 +24,12 @@ namespace TodoApi.Controllers
         private IUserService _userService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
-        private readonly DataContext _context;
 
         public UserController(
             IUserService userService,
             IMapper mapper,
-            IOptions<AppSettings> appSettings,
-            DataContext context)
+            IOptions<AppSettings> appSettings)
         {
-            _context = context;
             _userService = userService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
@@ -56,10 +50,7 @@ namespace TodoApi.Controllers
         {
             var user = _userService.Authenticate(userDto.Username, userDto.Password);
 
-            if (user == null)
-            {
-                return BadRequest(new { message = "Username or password is incorrect" });
-            }
+            if (user == null) return BadRequest(new { message = "Username or password is incorrect" });
 
             // Initializes an instance of JwtSecurityTokenHandler.
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -139,6 +130,22 @@ namespace TodoApi.Controllers
             return Ok(userDto);
         }
 
+        // GET: api/User/Todo/{username}
+        /// <summary>
+        /// Returns the Todo Items where User has given name.
+        /// </summary>
+        /// <param name="name">The User name</param>
+        /// <returns>A Todo Item list where User has matching name</returns>
+        /// <response code="200">A TodoItem list where User has matching name</response>
+        /// <response code="400">If passed parameter is of invalid type</response>
+        [HttpGet("Todo/{name}")]
+        [ProducesResponseType(typeof(TodoItems), 200)]
+        [ProducesResponseType(400)]
+        public IEnumerable<TodoItems> GetUserTodos(string name)
+        {
+            return _userService.GetUserTodos(name);
+        }
+
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -173,27 +180,6 @@ namespace TodoApi.Controllers
         {
             _userService.Delete(id);
             return Ok();
-        }
-
-        // GET: api/User/Todo/John%20Doe
-        /// <summary>
-        /// Returns the Todo Items where User has given name.
-        /// </summary>
-        /// <param name="name">The User name</param>
-        /// <returns>A Todo Item list where User has matching name</returns>
-        /// <response code="200">A TodoItem list where User has matching name</response>
-        /// <response code="400">If passed parameter is of invalid type</response>
-        [HttpGet("Todo/{name}")]
-        [ProducesResponseType(typeof(TodoItems), 200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<TodoItems>>> GetUserTodos(string name)
-        {
-            var selectTodos = from user in _context.Users
-                                join item in _context.TodoItems on user.Id equals item.UserId
-                                where user.Username == name
-                                select item;
-
-            return await selectTodos.ToListAsync();
         }
     }
 }

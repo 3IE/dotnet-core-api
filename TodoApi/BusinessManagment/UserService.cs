@@ -11,6 +11,7 @@ namespace TodoApi.BusinessManagment
         Users Authenticate(string username, string password);
         IEnumerable<Users> GetAll();
         Users GetById(int id);
+        IEnumerable<TodoItems> GetUserTodos(string name);
         Users Create(Users user, string password);
         void Update(Users user, string password = null);
         void Delete(int id);
@@ -60,6 +61,16 @@ namespace TodoApi.BusinessManagment
         public Users GetById(int id)
         {
             return _context.Users.Find(id);
+        }
+
+        public IEnumerable<TodoItems> GetUserTodos(string name)
+        {
+            var selectTodos = from user in _context.Users
+                                join item in _context.TodoItems on user.Id equals item.UserId
+                                where user.Username == name
+                                select item;
+
+            return selectTodos.ToList();
         }
 
         public Users Create(Users user, string password)
