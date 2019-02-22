@@ -34,18 +34,14 @@ namespace TodoApi.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(TodoItems[]), 200)]
         [ProducesResponseType(500)]
-        public /*async Task<ActionResult<IEnumerable<TodoItems>>>*/ string GetTodoItems()
+        public async Task<ActionResult<IEnumerable<TodoItems>>> GetTodoItems()
         {
-            return "Test";
-            /*
             var items = await _todoServices.GetTodoItems();
 
             if (items == null)
                 return NotFound();
-
-            return new ActionResult<IEnumerable<TodoItems>>(items);
-            */           
-            //return items;
+                          
+            return Ok(items);
         }
 
         // GET: api/Todo/5
@@ -66,7 +62,7 @@ namespace TodoApi.Controllers
             if (item == null)
                 return NotFound();
                 
-            return item;
+            return Ok(item);
         }
 
         // POST: api/Todo
