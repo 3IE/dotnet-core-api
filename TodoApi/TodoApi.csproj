@@ -10,7 +10,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\" />
     <Folder Include="Models\" />
-    <Folder Include="Services\" />
+    <Folder Include="BusinessManagement\" />
     <Folder Include="Helpers\" />
     <Folder Include="Middleware\" />
     <Folder Include="DataAccess\" />
