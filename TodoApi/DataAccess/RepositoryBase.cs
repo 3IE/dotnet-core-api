@@ -18,7 +18,7 @@ namespace TodoApi.DataAccess
 
     public class RepositoryBase<T> where T : class
     {
-        private DataContext _context;
+        protected DataContext _context;
 
         public RepositoryBase(DataContext context)
         {

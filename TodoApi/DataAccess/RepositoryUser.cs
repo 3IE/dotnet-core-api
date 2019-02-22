@@ -1,27 +1,16 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
 
 namespace TodoApi.DataAccess
 {
-    public interface IRepositoryUser<Users>
+    public interface IRepositoryUser : IRepositoryBase<Users>
     {
-        Task<IEnumerable<Users>> GetAll();
-        Task<Users> GetElem(int id);
-        Task AddElem(Users elem);
-        Task UpdateElem(int id, Users elem);
-        Task DeleteElem(Users elem);
     }
 
-    public class RepositoryUser : RepositoryBase<Users>
+    public class RepositoryUser :RepositoryBase<Users>, IRepositoryUser 
     {
-        private DataContext _context;
-
-        public RepositoryUser(DataContext context)
+        public RepositoryUser(DataContext context) : base(context)
         {
-            _context = context;
         }
     }
 }
