@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TodoApi.Entities;
 
-namespace TodoApi.Helpers
+namespace TodoApi.Models
 {
-    public partial class DataContext : DbContext
+    public class DataContext : DbContext
     {
         public DataContext()
         {
@@ -16,10 +15,6 @@ namespace TodoApi.Helpers
 
         public virtual DbSet<TodoItems> TodoItems { get; set; }
         public virtual DbSet<Users> Users { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,9 +34,9 @@ namespace TodoApi.Helpers
                 entity.Property(e => e.Id).HasDefaultValueSql("nextval('\"User_id_seq\"'::regclass)");
             });
 
-            modelBuilder.HasSequence("TodoItems_id_seq");
+            modelBuilder.HasSequence<int>("TodoItems_id_seq");
 
-            modelBuilder.HasSequence("User_id_seq");
+            modelBuilder.HasSequence<int>("User_id_seq");
         }
     }
 }

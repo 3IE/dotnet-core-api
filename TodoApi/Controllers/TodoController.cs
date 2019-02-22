@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Entities;
-using TodoApi.Helpers;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using TodoApi.Services;
+using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
@@ -14,11 +14,13 @@ namespace TodoApi.Controllers
     [Produces("application/json")]
     public class TodoController : ControllerBase
     {
-        private readonly DataContext _context;
+        private ITodoServices _todoServices;
+        private IMemoryCache _cache;
 
-        public TodoController(DataContext context)
+        public TodoController(ITodoServices todoServices, IMemoryCache memoryCache)
         {
-            _context = context;
+            _todoServices = todoServices;
+            _cache = memoryCache;
         }
 
         // GET: api/Todo
@@ -27,13 +29,19 @@ namespace TodoApi.Controllers
         /// </summary>
         /// <returns>Returns the list of all items</returns>
         /// <response code="200">Returns the list of all items</response>
+        /// <response code="404">If there are no items</response>
         /// <response code="500">On error</response>
         [HttpGet]
         [ProducesResponseType(typeof(TodoItems[]), 200)]
         [ProducesResponseType(500)]
         public async Task<ActionResult<IEnumerable<TodoItems>>> GetTodoItems()
         {
-            return await _context.TodoItems.ToListAsync();
+            var items = await _todoServices.GetTodoItems();
+
+            if (items == null)
+                return NotFound();
+                          
+            return Ok(items);
         }
 
         // GET: api/Todo/5
@@ -49,15 +57,12 @@ namespace TodoApi.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<TodoItems>> GetTodoItem(int id)
         {
-            var item = await _context.TodoItems.FindAsync(id);
+            var item = await _todoServices.GetTodoItem(id);
 
             if (item == null)
-            {
                 return NotFound();
-            }
-
-            // Return type is in the form "type ActionResult<T>"
-            return item;
+                
+            return Ok(item);
         }
 
         // POST: api/Todo
@@ -91,8 +96,7 @@ namespace TodoApi.Controllers
                     .Select(x => x.ErrorMessage));
             }
 
-            _context.TodoItems.Add(item);
-            await _context.SaveChangesAsync();
+            await _todoServices.PostTodoItem(item);
 
             // CreatedAtAction return HTTP 201 on successs
             // NB: standard for request that creates a ressource on the server
@@ -131,8 +135,7 @@ namespace TodoApi.Controllers
                     .Select(x => x.ErrorMessage));
             }
 
-            _context.Entry(item).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            await _todoServices.PutTodoItem(id, item);
 
             return NoContent();
         }
@@ -149,15 +152,12 @@ namespace TodoApi.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteTodoItem(int id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _todoServices.GetTodoItem(id);
 
             if (todoItem == null)
-            {
                 return NotFound();
-            }
 
-            _context.TodoItems.Remove(todoItem);
-            await _context.SaveChangesAsync();
+            await _todoServices.DeleteTodoItem(todoItem);
 
             return NoContent();
         }
