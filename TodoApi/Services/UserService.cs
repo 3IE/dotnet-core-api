@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TodoApi.Helpers;
 using TodoApi.Models;
@@ -8,50 +7,42 @@ using TodoApi.DataAccess;
 
 namespace TodoApi.Services
 {
-    public interface IUserService
+    public interface IUserServices
     {
-        Users Authenticate(string username, string password);
+        Task<Users> Authenticate(string username, string password);
         Task<IEnumerable<Users>> GetAllUsers();
         Task<Users> GetById(int id);
-        IEnumerable<TodoItems> GetUserTodos(string name);
+        Task<IEnumerable<TodoItems>> GetUserTodos(string name);
         Task<Users> Create(Users user, string password);
         Task UpdateUser(Users userParam, string password = null);
         Task DeleteUser(int id);
     }
 
-    public class UserService : IUserService
+    public class UserServices : IUserServices
     {
-        private RepositoryBase<Users> _userRepository;
-        private DataContext _context;
+        private IRepositoryUser _userRepository;
 
-        public UserService(RepositoryBase<Users> userRepository, DataContext context)
+        public UserServices(IRepositoryUser userRepository)
         {
             _userRepository = userRepository;
-            _context = context;
         }
 
-        public Users Authenticate(string username, string password)
+        public async Task<Users> Authenticate(string username, string password)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
                 return null;
-            }
 
             // Returns a single, specific element of a sequence,
             // or a default value if that element is not found.
-            var user = _context.Users.SingleOrDefault(x => x.Username == username);
+            var user = await _userRepository.GetAnyUsername(username);
 
             // check if username exists
             if (user == null)
-            {
                 return null;
-            }
 
             // check if password is correct
             if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-            {
                 return null;
-            }
 
             // authentication successful
             return user;
@@ -67,14 +58,9 @@ namespace TodoApi.Services
             return await _userRepository.GetElem(id);
         }
 
-        public IEnumerable<TodoItems> GetUserTodos(string name)
+        public async Task<IEnumerable<TodoItems>> GetUserTodos(string name)
         {
-            var selectTodos = from user in _context.Users
-                                join item in _context.TodoItems on user.Id equals item.UserId
-                                where user.Username == name
-                                select item;
-
-            return selectTodos.ToList();
+            return await _userRepository.GetUserTodos(name);
         }
 
         public async Task<Users> Create(Users user, string password)
@@ -83,7 +69,10 @@ namespace TodoApi.Services
             if (string.IsNullOrWhiteSpace(password))
                 throw new AppException("Password is required");
 
-            if (_context.Users.Any(x => x.Username == user.Username))
+            var selectedUser = await _userRepository.GetAnyUsername(user.Username);
+
+            // Check user does not already exists
+            if (selectedUser != null)
                 throw new AppException("Username \"" + user.Username + "\" is already taken");
 
             byte[] passwordHash, passwordSalt;
@@ -99,15 +88,17 @@ namespace TodoApi.Services
 
         public async Task UpdateUser(Users userParam, string password = null)
         {
-            var user = _context.Users.Find(userParam.Id);
+            var user = await _userRepository.GetElem(userParam.Id);
 
             if (user == null)
                 throw new AppException("User not found");
 
             if (userParam.Username != user.Username)
             {
+                var selectedUser = await _userRepository.GetAnyUsername(userParam.Username);
+
                 // username has changed so check if the new username is already taken
-                if (_context.Users.Any(x => x.Username == userParam.Username))
+                if (selectedUser != null)
                     throw new AppException("Username " + userParam.Username + " is already taken");
             }
 
@@ -129,11 +120,10 @@ namespace TodoApi.Services
 
         public async Task DeleteUser(int id)
         {
-            var user = _context.Users.Find(id);
+            var user = await _userRepository.GetElem(id);
+
             if (user != null)
-            {
                 await _userRepository.DeleteElem(user);
-            }
         }
 
         // private helper methods

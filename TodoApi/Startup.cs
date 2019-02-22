@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using AutoMapper;
 using TodoApi.Models;
 using TodoApi.Helpers;
-using TodoApi.Middleware;
+using TodoApi.DataAccess;
 using TodoApi.Services;
 
 namespace TodoApi
@@ -79,9 +79,12 @@ namespace TodoApi
             });
 
             // configure DI for application services
-            services.AddScoped<IUserService, UserService>();
-
             services.AddScoped<ITodoServices, TodoServices>();
+            services.AddScoped<IUserServices, UserServices>();
+
+            // Define DI for application repositories
+            services.AddScoped<IRepositoryUser, RepositoryUser>();
+            services.AddScoped<IRepositoryTodoItem, RepositoryTodoItem>();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>

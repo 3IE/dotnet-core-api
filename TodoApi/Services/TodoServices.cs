@@ -17,9 +17,9 @@ namespace TodoApi.Services
 
     public class TodoServices : ITodoServices
     {
-        private RepositoryBase<TodoItems> _repository;
+        private IRepositoryTodoItem _repository;
 
-        public TodoServices(RepositoryBase<TodoItems> repository)
+        public TodoServices(IRepositoryTodoItem repository)
         {
             _repository = repository;
         }

@@ -12,6 +12,7 @@ using TodoApi.Models;
 using TodoApi.Services;
 using TodoApi.Helpers;
 using TodoApi.Dtos;
+using System.Threading.Tasks;
 
 namespace TodoApi.Controllers
 {
@@ -21,12 +22,12 @@ namespace TodoApi.Controllers
     [Produces("application/json")]
     public class UserController : ControllerBase
     {
-        private IUserService _userService;
+        private IUserServices _userService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
 
         public UserController(
-            IUserService userService,
+            IUserServices userService,
             IMapper mapper,
             IOptions<AppSettings> appSettings)
         {
@@ -46,11 +47,12 @@ namespace TodoApi.Controllers
         [HttpPost("Authenticate")]
         [ProducesResponseType(typeof(Users), 200)]
         [ProducesResponseType(400)]
-        public ActionResult<Users> Authenticate([FromBody]UserDto userDto)
+        public async Task<IActionResult> Authenticate([FromBody]UserDto userDto)
         {
-            var user = _userService.Authenticate(userDto.Username, userDto.Password);
+            var user = await _userService.Authenticate(userDto.Username, userDto.Password);
 
-            if (user == null) return BadRequest(new { message = "Username or password is incorrect" });
+            if (user == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
 
             // Initializes an instance of JwtSecurityTokenHandler.
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -61,16 +63,15 @@ namespace TodoApi.Controllers
             // Place holder for all the attributes related to the issued token
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // The ClaimsIdentity class is a concrete implementation of a claims-based identity;
-                // that is, an identity described by a collection of claims.
-                // A claim is a statement about an entity made by an issuer that describes a property,
-                // right, or some other quality of that entity.
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                )
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
@@ -95,14 +96,14 @@ namespace TodoApi.Controllers
         [HttpPost("Register")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public IActionResult Register([FromBody]UserDto userDto)
+        public async Task<IActionResult> Register([FromBody]UserDto userDto)
         {
             // map dto to entity
             var user = _mapper.Map<Users>(userDto);
 
             try
             {
-                _userService.Create(user, userDto.Password);
+                await _userService.Create(user, userDto.Password);
                 return Ok();
             }
             catch (AppException ex)
@@ -114,18 +115,18 @@ namespace TodoApi.Controllers
 
         [HttpGet]
         [ProducesResponseType(200)]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var users = _userService.GetAllUsers();
+            var users = await _userService.GetAllUsers();
             var userDtos = _mapper.Map<IList<UserDto>>(users);
             return Ok(userDtos);
         }
 
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var user = _userService.GetById(id);
+            var user = await _userService.GetById(id);
             var userDto = _mapper.Map<UserDto>(user);
             return Ok(userDto);
         }
@@ -141,15 +142,16 @@ namespace TodoApi.Controllers
         [HttpGet("Todo/{name}")]
         [ProducesResponseType(typeof(TodoItems), 200)]
         [ProducesResponseType(400)]
-        public IEnumerable<TodoItems> GetUserTodos(string name)
+        public async Task<IActionResult> GetUserTodos(string name)
         {
-            return _userService.GetUserTodos(name);
+            var users = await _userService.GetUserTodos(name);
+            return Ok(users);
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public IActionResult Update(int id, [FromBody]UserDto userDto)
+        public async Task<IActionResult> Update(int id, [FromBody]UserDto userDto)
         {
             // map dto to entity and set id
             var user = _mapper.Map<Users>(userDto);
@@ -158,7 +160,7 @@ namespace TodoApi.Controllers
             try
             {
                 // save 
-                _userService.UpdateUser(user, userDto.Password);
+                await _userService.UpdateUser(user, userDto.Password);
                 return Ok();
             }
             catch (AppException ex)
@@ -176,9 +178,9 @@ namespace TodoApi.Controllers
         /// <response code="200">Returns nothing</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(200)]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _userService.DeleteUser(id);
+            await _userService.DeleteUser(id);
             return Ok();
         }
     }
