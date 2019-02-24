@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.InMemory;
 using TodoApi.Models;
 using TodoApi.BusinessManagement;
 using TodoApi.DataAccess;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TodoApiTests
 {
@@ -31,6 +33,26 @@ namespace TodoApiTests
 
                 Assert.NotNull(user);
                 Assert.True(user.Username == "user1");
+            }
+            finally
+            {
+                context.Dispose();
+            }
+        }
+
+        [Fact(DisplayName = "Create new user and read db")]
+        public async void Create_new_user_and_read_db()
+        {
+            var context = GetContext();
+            var access = new RepositoryUser(context);
+            var bm = new UserServices(access);
+            try
+            {
+                await bm.Create(new Users { Username = "user1" }, "test");
+                var users = await bm.GetAllUsers();
+                ICollection<Users> userList = users as ICollection<Users>;
+                Assert.True(userList.Count == 1);
+                Assert.True(userList.FirstOrDefault().Username == "user1");
             }
             finally
             {

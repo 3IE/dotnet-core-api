@@ -6,3 +6,9 @@ services:
     build:
       context: .
       dockerfile: TodoApi/Dockerfile
+    ports:
+        - '8000:80'
+    links: 
+        - "db:database"
+  db:
+    image: postgres
