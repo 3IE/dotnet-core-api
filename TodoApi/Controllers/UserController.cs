@@ -103,8 +103,8 @@ namespace TodoApi.Controllers
 
             try
             {
-                await _userService.Create(user, userDto.Password);
-                return Ok();
+                var newUser = await _userService.Create(user, userDto.Password);
+                return Ok(newUser);
             }
             catch (AppException ex)
             {
