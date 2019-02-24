@@ -5,7 +5,7 @@ using TodoApi.Helpers;
 using TodoApi.Models;
 using TodoApi.DataAccess;
 
-namespace TodoApi.Services
+namespace TodoApi.BusinessManagement
 {
     public interface IUserServices
     {

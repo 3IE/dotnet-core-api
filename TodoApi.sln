@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoApi", "TodoApi\TodoApi.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoApiTests", "TodoApiTests\TodoApiTests.csproj", "{55ACC1D2-2B43-4DFA-9DAC-45C909C9FEDD}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{A1C86A0A-EFEA-443D-B64B-03596E8BE6E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,5 +21,9 @@ Global
 		{55ACC1D2-2B43-4DFA-9DAC-45C909C9FEDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55ACC1D2-2B43-4DFA-9DAC-45C909C9FEDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55ACC1D2-2B43-4DFA-9DAC-45C909C9FEDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1C86A0A-EFEA-443D-B64B-03596E8BE6E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1C86A0A-EFEA-443D-B64B-03596E8BE6E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1C86A0A-EFEA-443D-B64B-03596E8BE6E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1C86A0A-EFEA-443D-B64B-03596E8BE6E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
 using TodoApi.Models;
-using TodoApi.Services;
+using TodoApi.BusinessManagement;
 using TodoApi.Helpers;
 using TodoApi.Dtos;
 using System.Threading.Tasks;
@@ -103,8 +103,8 @@ namespace TodoApi.Controllers
 
             try
             {
-                await _userService.Create(user, userDto.Password);
-                return Ok();
+                var newUser = await _userService.Create(user, userDto.Password);
+                return Ok(newUser);
             }
             catch (AppException ex)
             {
