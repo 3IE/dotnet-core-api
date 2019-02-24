@@ -1,7 +1,6 @@
 using Xunit;
 using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.InMemory;
 using TodoApi.Models;
 using TodoApi.BusinessManagement;
 using TodoApi.DataAccess;
@@ -51,8 +50,8 @@ namespace TodoApiTests
                 await bm.Create(new Users { Username = "user1" }, "test");
                 var users = await bm.GetAllUsers();
                 ICollection<Users> userList = users as ICollection<Users>;
-                Assert.True(userList.Count == 1);
-                Assert.True(userList.FirstOrDefault().Username == "user1");
+                Assert.Equal(1, userList.Count);
+                Assert.Equal("user1", userList.First().Username);
             }
             finally
             {
