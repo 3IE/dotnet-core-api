@@ -53,6 +53,7 @@ namespace TodoApiTests
             catch
             {
                 Assert.True(true);
+                context.Dispose();
             }
             finally
             {
@@ -94,6 +95,7 @@ namespace TodoApiTests
             catch
             {
                 Assert.True(true);
+                context.Dispose();
             }
             finally
             {
@@ -121,7 +123,6 @@ namespace TodoApiTests
             }
         }
 
-        /*
         [Fact(DisplayName = "Update user correctly")]
         public async void Update_user_correctly()
         {
@@ -138,13 +139,13 @@ namespace TodoApiTests
             catch
             {
                 Assert.True(false);
+                context.Dispose();
             }
             finally
             {
                 context.Dispose();
             }
         }
-        */
 
         [Fact(DisplayName = "Update user with existing username")]
         public async void Update_user_no_password()
@@ -162,6 +163,7 @@ namespace TodoApiTests
             catch
             {
                 Assert.True(true);
+                context.Dispose();
             }
             finally
             {
@@ -206,6 +208,7 @@ namespace TodoApiTests
             catch
             {
                 Assert.True(true);
+                context.Dispose();
             }
             finally
             {

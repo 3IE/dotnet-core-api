@@ -166,6 +166,24 @@ namespace TodoApi.Controllers
             return Ok(items);
         }
 
+        // PUT: api/User/5
+        /// <summary>
+        /// Updates the User with given id.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /User
+        ///     {
+        ///        "Id": 1,
+        ///        "Username": "Item1"
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="id">The User Id</param>
+        /// <param name="userDto"></param>
+        /// <response code="204">Returns nothing</response>
+        /// <response code="400">If id or User is invalid</response>
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
