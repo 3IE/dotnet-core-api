@@ -45,9 +45,9 @@ namespace TodoApi.Controllers
         /// <response code="500">On error</response>
         [AllowAnonymous]
         [HttpPost("Authenticate")]
-        [ProducesResponseType(typeof(Users), 200)]
+        [ProducesResponseType(typeof(UserDto), 200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> Authenticate([FromBody]UserDto userDto)
+        public async Task<IActionResult> Authenticate(UserDto userDto)
         {
             var user = await _userService.Authenticate(userDto.Username, userDto.Password);
 
@@ -94,9 +94,9 @@ namespace TodoApi.Controllers
         /// <response code="400">On creation error</response>
         [AllowAnonymous]
         [HttpPost("Register")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(UserDto), 200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> Register([FromBody]UserDto userDto)
+        public async Task<IActionResult> Register(UserDto userDto)
         {
             // map dto to entity
             var user = _mapper.Map<Users>(userDto);
@@ -113,8 +113,17 @@ namespace TodoApi.Controllers
             }
         }
 
+        // GET: api/User
+        /// <summary>
+        /// Returns the list of all Users.
+        /// </summary>
+        /// <returns>Returns the list of all Users</returns>
+        /// <response code="200">Returns the list of all Users</response>
+        /// <response code="404">If there are no Users</response>
+        /// <response code="500">On error</response>
         [HttpGet]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(UserDto[]), 200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsers();
@@ -122,8 +131,17 @@ namespace TodoApi.Controllers
             return Ok(userDtos);
         }
 
+        // GET: api/User/5
+        /// <summary>
+        /// Returns the User with given id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>The User with the matching id</returns>
+        /// <response code="200">The User with the matching id</response>
+        /// <response code="404">If not User match the given id</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(UserDto[]), 200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetById(int id)
         {
             var user = await _userService.GetById(id);
@@ -144,14 +162,14 @@ namespace TodoApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetUserTodos(string name)
         {
-            var users = await _userService.GetUserTodos(name);
-            return Ok(users);
+            var items = await _userService.GetUserTodos(name);
+            return Ok(items);
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> Update(int id, [FromBody]UserDto userDto)
+        public async Task<IActionResult> Update(int id, UserDto userDto)
         {
             // map dto to entity and set id
             var user = _mapper.Map<Users>(userDto);

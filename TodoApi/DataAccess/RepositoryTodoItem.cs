@@ -16,7 +16,5 @@ namespace TodoApi.DataAccess
         public RepositoryTodoItem(DataContext context) : base(context)
         {
         }
-
-        // Adds specific functions
     }
 }
