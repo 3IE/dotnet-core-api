@@ -11,7 +11,7 @@ using TodoApi.BusinessManagement;
 
 namespace TodoApiTests
 {
-    public class UnitTest1
+    public class TestUsers
     {
         private DataContext GetContext()
         {
