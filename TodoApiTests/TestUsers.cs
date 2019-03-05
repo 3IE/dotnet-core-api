@@ -2,7 +2,6 @@ using Xunit;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-//using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
 using TodoApi.DataAccess;

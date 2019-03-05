@@ -1,0 +1,22 @@
+kind: pipeline
+name: default
+
+workspace:
+  base: /dotnet
+  path: src/github.com/3IE/todo-api
+
+steps:
+  - name: install
+    image: mcr.microsoft.com/dotnet/core/sdk:2.1
+    commands:
+      - cd TodoApi
+      - dotnet restore
+      - cd ../TodoApiTests
+      - dotnet restore
+  - name: build
+    image: mcr.microsoft.com/dotnet/core/sdk:2.1
+    commands:
+      - cd ../TodoApi
+      - dotnet build
+      - cd ../TodoApiTests
+      - dotnet build
