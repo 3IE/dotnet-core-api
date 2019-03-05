@@ -16,7 +16,7 @@ steps:
   - name: build
     image: mcr.microsoft.com/dotnet/core/sdk:2.1
     commands:
-      - cd ../TodoApi
+      - cd TodoApi
       - dotnet build
       - cd ../TodoApiTests
       - dotnet build
