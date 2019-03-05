@@ -124,6 +124,8 @@ namespace TodoApi.BusinessManagement
 
             if (user != null)
                 await _userRepository.DeleteElem(user);
+            else
+                throw new AppException("User not found");
         }
 
         // private helper methods

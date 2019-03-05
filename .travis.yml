@@ -4,7 +4,13 @@ mono: none
 dotnet: 2.1.504
 
 install:
+  - cd TodoApi
+  - dotnet restore
+  - cd ../TodoApiTests
   - dotnet restore
 
 script:
+  - cd ../TodoApi
+  - dotnet build
+  - cd ../TodoApiTests
   - dotnet build

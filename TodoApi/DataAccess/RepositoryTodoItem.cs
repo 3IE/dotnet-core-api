@@ -8,7 +8,6 @@ namespace TodoApi.DataAccess
 {
     public interface IRepositoryTodoItem : IRepositoryBase<TodoItems>
     {
-        // Adds specific functions interfaces
     }
 
     public class RepositoryTodoItem : RepositoryBase<TodoItems>, IRepositoryTodoItem
@@ -16,7 +15,5 @@ namespace TodoApi.DataAccess
         public RepositoryTodoItem(DataContext context) : base(context)
         {
         }
-
-        // Adds specific functions
     }
 }
