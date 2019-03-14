@@ -1,6 +1,8 @@
 kind: pipeline
 name: default
 
+platform: linux/arm
+
 workspace:
   base: /dotnet
   path: src/github.com/3IE/todo-api
