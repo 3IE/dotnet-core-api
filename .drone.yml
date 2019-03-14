@@ -5,7 +5,7 @@ platform: linux/arm
 
 workspace:
   base: /dotnet
-  path: src/github.com/3IE/todo-apis
+  path: src/github.com/3IE/todo-api
 
 steps:
   - name: install
